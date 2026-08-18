@@ -1,0 +1,22 @@
+# API keys — never commit these
+.env
+.env.local
+*.env
+
+# Supabase local
+.supabase/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+
+# Editor
+.windsurf/
+.vscode/
+*.swp

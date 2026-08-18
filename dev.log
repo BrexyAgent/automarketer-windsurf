@@ -1,0 +1,80 @@
+
+> automarketer@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.23
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.33:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1378ms
+ ✓ Compiled /middleware in 485ms (171 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (107kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (258kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ○ Compiling /brands ...
+ ✓ Compiled /brands in 3s (793 modules)
+ GET /brands 200 in 3797ms
+ ✓ Compiled /pipeline in 251ms (798 modules)
+ GET /pipeline 200 in 342ms
+ GET /pipeline 200 in 130ms
+ ✓ Compiled /dashboard in 413ms (801 modules)
+ GET /dashboard 200 in 755ms
+ GET /brands 200 in 31ms
+ GET /brands 200 in 12ms
+ GET /brands 200 in 448ms
+ ✓ Compiled in 1870ms (305 modules)
+ ✓ Compiled in 398ms (305 modules)
+ ✓ Compiled in 159ms (305 modules)
+ ✓ Compiled in 141ms (305 modules)
+ ✓ Compiled in 167ms (305 modules)
+ ✓ Compiled in 118ms (305 modules)
+ ✓ Compiled in 1405ms (305 modules)
+ ✓ Compiled in 182ms (305 modules)
+ ✓ Compiled in 236ms (305 modules)
+ ✓ Compiled in 161ms (305 modules)
+ ✓ Compiled in 149ms (305 modules)
+ ✓ Compiled in 146ms (305 modules)
+ ✓ Compiled in 402ms (305 modules)
+ ✓ Compiled in 205ms (305 modules)
+ ✓ Compiled in 596ms (305 modules)
+ ✓ Compiled in 487ms (800 modules)
+ ✓ Compiled in 207ms (305 modules)
+ ✓ Compiled in 264ms (305 modules)
+ ✓ Compiled in 459ms (305 modules)
+ GET /brands 200 in 197ms
+ GET /brands 200 in 311ms
+ ✓ Compiled /pipeline in 420ms (506 modules)
+ ○ Compiling /calendar ...
+ ✓ Compiled /approval in 1328ms (824 modules)
+ ⨯ Error: Cannot find module './543.js'
+Require stack:
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/.next/server/webpack-runtime.js
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/.next/server/app/(app)/calendar/page.js
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/node_modules/next/dist/server/require.js
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/node_modules/next/dist/server/load-components.js
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/node_modules/next/dist/build/utils.js
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/node_modules/next/dist/build/swc/options.js
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/node_modules/next/dist/build/swc/index.js
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/node_modules/next/dist/server/config.js
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/node_modules/next/dist/server/next.js
+- /Users/pankajkapoor/Downloads/automarketer-windsurf/node_modules/next/dist/server/lib/start-server.js
+    at <unknown> (.next/server/app/(app)/dashboard/page.js:2:22012)
+    at Object.<anonymous> (.next/server/app/(app)/dashboard/page.js:2:22073) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/dashboard'
+}
+ GET /calendar 200 in 2565ms
+ GET /pipeline 200 in 2860ms
+ GET /approval 200 in 1734ms
+ GET /generate 200 in 3042ms
+ ○ Compiling /competitors ...
+ GET /dashboard 500 in 5009ms
+ GET /pipeline 200 in 1826ms
+ ✓ Compiled /posts in 3.1s (1199 modules)
+ GET /pipeline 200 in 513ms
+ GET /brands 200 in 419ms
+ GET /pipeline 200 in 316ms
+ ✓ Compiled in 2.1s (1066 modules)

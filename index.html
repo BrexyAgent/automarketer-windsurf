@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoMarketer — AI Marketing Platform</title>
+  <meta name="description" content="AutoMarketer: AI-powered social media marketing automation for agencies and brands.">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="setup-screen">
+  <div style="max-width:380px;width:100%">
+    <div style="text-align:center;margin-bottom:36px">
+      <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#6C5CE7,#9D8FFB);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;margin:0 auto 16px;color:#fff">A</div>
+      <div style="font-size:24px;font-weight:700;color:var(--t1)">AutoMarketer</div>
+      <div style="font-size:12px;color:var(--t2);margin-top:5px">AI Marketing Platform</div>
+    </div>
+    <div id="login-box" class="card">
+      <div style="font-size:15px;font-weight:600;margin-bottom:18px;color:var(--t1)">Sign in</div>
+      <div style="display:flex;flex-direction:column;gap:13px">
+        <div><label class="lbl">Email address</label><input class="inp" id="login-email" placeholder="you@email.com" type="email" autocomplete="email"></div>
+        <div><label class="lbl">Password</label><input class="inp" id="login-pass" placeholder="Your password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <div id="login-err" style="font-size:12px;min-height:14px"></div>
+        <button class="btn bp bfw" onclick="doLogin()" style="padding:12px;font-size:13px;margin-top:2px">Sign In</button>
+        <div style="text-align:center;font-size:12px;color:var(--t2)">No account yet? <span style="color:var(--acc2);cursor:pointer;font-weight:500" onclick="showSignup()">Create account</span></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn bg bsm" onclick="launchDemo()" style="font-size:11px;color:var(--t3)">Try Demo Mode</button>
+    </div>
+  </div>
+
+  <!-- SIGNUP (hidden by default) -->
+  <div id="signup-box" style="max-width:380px;width:100%;display:none">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#6C5CE7,#9D8FFB);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;margin:0 auto 14px;color:#fff">A</div>
+      <div style="font-size:22px;font-weight:700;color:var(--t1)">Create Account</div>
+      <div style="font-size:12px;color:var(--t2);margin-top:4px">Set up your AutoMarketer account</div>
+    </div>
+    <div class="card">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="g2" style="gap:9px">
+          <div><label class="lbl">Your Name</label><input class="inp" id="su-fname" placeholder="Sunny"></div>
+          <div><label class="lbl">Agency</label><input class="inp" id="su-agency" placeholder="Shangari Group"></div>
+        </div>
+        <div><label class="lbl">Email</label><input class="inp" id="su-email" placeholder="amit@risingcap.co" type="email"></div>
+        <div><label class="lbl">Password</label><input class="inp" id="su-pass" placeholder="Min 8 characters" type="password"></div>
+        <div id="su-err" style="font-size:12px;min-height:14px"></div>
+        <button class="btn bp bfw" onclick="doSignup()" style="padding:12px;font-size:13px">Create Account</button>
+        <div style="text-align:center;font-size:12px;color:var(--t2)">Have an account? <span style="color:var(--acc2);cursor:pointer;font-weight:500" onclick="showLogin()">Sign in</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mov" class="h"><div class="modal" id="mbody"></div></div>
+<div id="shell" style="display:none">
+  <div id="sb">
+    <div id="logo-row">
+      <div class="logo-mk">A</div>
+      <div id="logo-txt" style="flex:1"><div style="font-size:13px;font-weight:600">AutoMarketer</div><div style="font-size:10px;color:var(--t2)" id="sb-sub">AI Marketing Platform</div></div>
+      <button id="sb-tog" onclick="toggleSB()">&#8801;</button>
+    </div>
+    <div style="padding:8px;border-bottom:1px solid var(--b1)">
+      <select class="brand-sel" id="brand-sel" onchange="switchBrand(this.value)"><option>Loading...</option></select>
+    </div>
+    <div id="nav"></div>
+    <div id="sb-foot" style="padding:9px 14px;border-top:1px solid var(--b1);font-size:11px;flex-shrink:0;display:flex;align-items:center;gap:6px">
+      <span id="foot-dot" style="width:7px;height:7px;border-radius:50%;background:var(--grn);display:inline-block"></span>
+      <span id="foot-txt" style="color:var(--grn)">System Active</span>
+    </div>
+  </div>
+  <div id="main">
+    <div id="bar">
+      <div style="flex:1"><div id="bc" style="font-size:11px;color:var(--t2)">Overview &rsaquo; <span style="color:var(--t1);font-weight:600">Dashboard</span></div></div>
+      <div style="display:flex;gap:7px;align-items:center">
+        <div id="bar-intel"></div>
+        <button class="btn bg bsm" onclick="showCfg()">&#9881; Settings</button>
+        <div style="width:1px;height:18px;background:var(--b1)"></div>
+        <div id="bar-brand" style="font-size:11px;color:var(--t2)"></div>
+        <div style="width:32px;height:32px;border-radius:10px;background:var(--acc-bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--acc2)" id="bar-av">SG</div>
+      </div>
+    </div>
+    <div id="pg"></div>
+  </div>
+</div>
+
+
+
+  <!-- Core must load first -->
+  <script src="js/core.js"></script>
+
+  <!-- Pages -->
+  <script src="js/dashboard.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/analytics.js"></script>
+
+  <!-- SEO Blog -->
+  <script src="js/seoblog-claude.js"></script>
+  <script src="js/seoblog-downloads.js"></script>
+  <script src="js/blog-library.js"></script>
+  <script src="js/seoblog-n8n.js"></script>
+
+  <!-- Automation -->
+  <script src="js/workflows.js"></script>
+
+</body>
+</html>
