@@ -20,3 +20,4 @@ node_modules/
 .windsurf/
 .vscode/
 *.swp
+.vercel

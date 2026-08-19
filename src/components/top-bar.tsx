@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getSelectedBrandId } from "@/lib/brand";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import type { Database } from "@/types/database";
 
 type Brand = Database["public"]["Tables"]["brands"]["Row"];
@@ -40,6 +42,14 @@ export default function TopBar({ brands }: { brands: Brand[] }) {
     [brands, selectedBrandId]
   );
 
+  const supabase = createClient();
+  const router = useRouter();
+
+  async function logout() {
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
+
   return (
     <div className="flex flex-shrink-0 items-center justify-between border-b border-b1 bg-c1 px-6 py-3">
       <div className="text-[11px] text-t2">
@@ -58,6 +68,13 @@ export default function TopBar({ brands }: { brands: Brand[] }) {
         >
           Settings
         </Link>
+
+        <button
+          onClick={logout}
+          className="rounded-md bg-red px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-red/90"
+        >
+          Log Out
+        </button>
 
         <div className="h-[18px] w-px bg-b1" />
 

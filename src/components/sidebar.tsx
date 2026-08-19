@@ -5,9 +5,54 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { setSelectedBrand, getSelectedBrandId } from "@/lib/brand";
+import {
+  LayoutDashboard,
+  Building2,
+  Zap,
+  Sparkles,
+  CheckCircle2,
+  CalendarDays,
+  FileText,
+  BarChart3,
+  FileBarChart,
+  Target,
+  Hash,
+  Smile,
+  PenTool,
+  Settings,
+  BookOpen,
+  Workflow,
+  Gem,
+  Bell,
+  Plug,
+  KeyRound,
+} from "lucide-react";
 import type { Database } from "@/types/database";
 
 type Brand = Database["public"]["Tables"]["brands"]["Row"];
+
+const ICONS: Record<string, React.ReactNode> = {
+  dashboard: <LayoutDashboard className="h-4 w-4" />,
+  brands: <Building2 className="h-4 w-4" />,
+  pipeline: <Zap className="h-4 w-4" />,
+  generate: <Sparkles className="h-4 w-4" />,
+  approval: <CheckCircle2 className="h-4 w-4" />,
+  calendar: <CalendarDays className="h-4 w-4" />,
+  posts: <FileText className="h-4 w-4" />,
+  analytics: <BarChart3 className="h-4 w-4" />,
+  reports: <FileBarChart className="h-4 w-4" />,
+  competitor: <Target className="h-4 w-4" />,
+  hashtag: <Hash className="h-4 w-4" />,
+  sentiment: <Smile className="h-4 w-4" />,
+  seoblog: <PenTool className="h-4 w-4" />,
+  seoblog_n8n: <Settings className="h-4 w-4" />,
+  bloglibrary: <BookOpen className="h-4 w-4" />,
+  workflows: <Workflow className="h-4 w-4" />,
+  brand: <Gem className="h-4 w-4" />,
+  notifications: <Bell className="h-4 w-4" />,
+  integrations: <Plug className="h-4 w-4" />,
+  apikeys: <KeyRound className="h-4 w-4" />,
+};
 
 const NAV = [
   {
@@ -149,7 +194,7 @@ export default function Sidebar({ brands }: { orgName: string; userEmail: string
                       : "border border-transparent text-t2 hover:bg-c2 hover:text-t1"
                   }`}
                 >
-                  <span className="flex h-4 w-4 items-center justify-center text-[13px]">{item.i}</span>
+                  <span className="flex h-4 w-4 items-center justify-center">{ICONS[item.id]}</span>
                   <span className="flex-1">{item.label}</span>
                   {item.b === "approval" && pendingCount > 0 && (
                     <span className="ml-auto rounded-full bg-red px-1.5 py-0 text-[10px] font-medium text-white">

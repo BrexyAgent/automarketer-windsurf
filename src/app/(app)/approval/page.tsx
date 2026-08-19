@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useBrand } from "@/components/brand-provider";
 import Link from "next/link";
 import type { Database } from "@/types/database";
+import { publishPostAction } from "./actions";
 
 type Post = Database["public"]["Tables"]["posts"]["Row"];
 
@@ -134,6 +135,12 @@ export default function ApprovalPage() {
     for (const id of ids) {
       await (supabase.from("posts") as any).update({ status: "approved", approved_at: new Date().toISOString() }).eq("id", id);
     }
+    loadPosts();
+  }
+
+  async function publish(p: Post) {
+    const res = await publishPostAction(p.id);
+    if (res.error) return alert(res.error);
     loadPosts();
   }
 
@@ -291,7 +298,7 @@ export default function ApprovalPage() {
                         </>
                       )}
                       {(col.id === "approved" || col.id === "auto_approved") && (
-                        <button onClick={(e) => { e.stopPropagation(); updateStatus(p.id, "published"); }} className="rounded bg-acc px-2 py-1 text-[10px] text-white">
+                        <button onClick={(e) => { e.stopPropagation(); publish(p); }} className="rounded bg-acc px-2 py-1 text-[10px] text-white">
                           Publish →
                         </button>
                       )}
