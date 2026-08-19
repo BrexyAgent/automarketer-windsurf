@@ -26,6 +26,7 @@ import {
   Bell,
   Plug,
   KeyRound,
+  Clapperboard,
 } from "lucide-react";
 import type { Database } from "@/types/database";
 
@@ -52,6 +53,7 @@ const ICONS: Record<string, React.ReactNode> = {
   notifications: <Bell className="h-4 w-4" />,
   integrations: <Plug className="h-4 w-4" />,
   apikeys: <KeyRound className="h-4 w-4" />,
+  video: <Clapperboard className="h-4 w-4" />,
 };
 
 const NAV = [
@@ -93,6 +95,7 @@ const NAV = [
       { id: "seoblog", label: "SEO Blog (Claude)", i: "✍" },
       { id: "seoblog_n8n", label: "SEO Blog (n8n)", i: "⚙" },
       { id: "bloglibrary", label: "Blog Library", i: "◻" },
+      { id: "video", label: "Video Generator", i: "▶" },
     ],
   },
   {
@@ -119,6 +122,7 @@ const HREF_MAP: Record<string, string> = {
   bloglibrary: "/blog-library",
   apikeys: "/api-keys",
   workflows: "/workflows",
+  video: "/video-generator",
 };
 
 function hrefFor(id: string) {
