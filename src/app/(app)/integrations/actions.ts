@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { encrypt } from "@/lib/crypto";
 
 export async function getCredentials(orgId: string) {
   const supabase = (await createClient()) as any;
@@ -28,11 +29,12 @@ export async function saveCredential({
   value: string;
 }) {
   const supabase = (await createClient()) as any;
+  const encrypted = encrypt(value);
   const { error } = await supabase.from("organization_credentials").upsert(
     {
       organization_id: orgId,
       service,
-      encrypted_value: value,
+      encrypted_value: encrypted,
     },
     {
       onConflict: "organization_id,service",

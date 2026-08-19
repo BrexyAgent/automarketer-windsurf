@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createBufferUpdate, getBufferProfiles, formatPostText } from "@/lib/publish";
+import { decrypt } from "@/lib/crypto";
 
 export async function publishPostAction(postId: string) {
   const supabase = (await createClient()) as any;
@@ -28,7 +29,8 @@ export async function publishPostAction(postId: string) {
   }
 
   try {
-    const profiles = await getBufferProfiles(cred.encrypted_value);
+    const token = decrypt(cred.encrypted_value);
+    const profiles = await getBufferProfiles(token);
     const profile = profiles.find(
       (p) => p.service === post.platform || (p.service || "").toLowerCase() === (post.platform || "").toLowerCase()
     );
@@ -38,7 +40,7 @@ export async function publishPostAction(postId: string) {
     }
 
     const update = await createBufferUpdate(
-      cred.encrypted_value,
+      token,
       profile.id,
       formatPostText(post.content || "", post.hashtags || []),
       post.image_url
