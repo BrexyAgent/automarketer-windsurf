@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useBrand } from "@/components/brand-provider";
+import { applyBestTime, getBestTime } from "@/lib/schedule";
 import Link from "next/link";
 import type { Database } from "@/types/database";
 
@@ -128,7 +129,7 @@ export default function GeneratePage() {
         const idx = newPosts.length;
         const t = topic.trim() || pillars[(idx + pi) % pillars.length];
         const ht = [...words, t.replace(/\s/g, "").toLowerCase()].slice(0, 5);
-        const scheduled = new Date(now.getTime() + (idx + 1) * 86400000);
+        const scheduled = applyBestTime(new Date(now.getTime() + (idx + 1) * 86400000), platform);
         const approval = new Date(now.getTime() + (brand.auto_approve_hours || 24) * 3600000);
         const content = makeContent(platform, t, tone, brand, i);
         const imagePrompt = doImage
@@ -145,11 +146,11 @@ export default function GeneratePage() {
           hashtags: ht,
           image_url: imageUrl,
           image_prompt: imagePrompt,
-          best_time: "09:00",
+          best_time: getBestTime(platform),
           content_pillar: t,
           status: "pending_approval",
           approval_deadline: approval.toISOString(),
-          scheduled_at: scheduled.toISOString(),
+          scheduled_at: scheduled,
           author: "AutoMarketer AI",
           reach: 0,
           likes: 0,

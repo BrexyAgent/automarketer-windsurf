@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useBrand } from "@/components/brand-provider";
+import { getBestTime } from "@/lib/schedule";
 import type { Database } from "@/types/database";
 
 type Post = Database["public"]["Tables"]["posts"]["Row"];
@@ -76,8 +77,12 @@ export default function CalendarPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [addPlatform, setAddPlatform] = useState("instagram");
   const [addDate, setAddDate] = useState(new Date().toISOString().split("T")[0]);
-  const [addTime, setAddTime] = useState("09:00");
+  const [addTime, setAddTime] = useState(getBestTime("instagram"));
   const [addContent, setAddContent] = useState("");
+
+  useEffect(() => {
+    setAddTime(getBestTime(addPlatform));
+  }, [addPlatform]);
 
   async function loadPosts() {
     if (!brand || !orgId) return;
