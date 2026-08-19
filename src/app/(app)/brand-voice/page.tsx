@@ -34,6 +34,8 @@ export default function BrandVoicePage() {
   const [newPillar, setNewPillar] = useState("");
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [attachments, setAttachments] = useState<Array<{ name: string; url: string }>>([]);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
 
   async function loadBrand() {
     if (!brand) {
@@ -72,6 +74,58 @@ export default function BrandVoicePage() {
 
   function delPillar(i: number) {
     setPillars(pillars.filter((_, idx) => idx !== i));
+  }
+
+  async function loadAttachments() {
+    if (!brand) {
+      setAttachments([]);
+      return;
+    }
+    const { data, error } = await supabase.storage
+      .from("post-images")
+      .list(`brand-attachments/${brand.id}`);
+    if (error) {
+      console.error(error);
+      return;
+    }
+    const items = (data || []).filter((x) => x.name !== ".emptyFolderPlaceholder");
+    setAttachments(
+      items.map((x) => ({
+        name: x.name,
+        url: supabase.storage
+          .from("post-images")
+          .getPublicUrl(`brand-attachments/${brand.id}/${x.name}`).data.publicUrl,
+      }))
+    );
+  }
+
+  useEffect(() => {
+    loadAttachments();
+  }, [brand]);
+
+  async function uploadAttachment(file: File) {
+    if (!brand) return;
+    setUploadingAttachment(true);
+    const path = `brand-attachments/${brand.id}/${Date.now()}_${file.name}`;
+    const { error } = await supabase.storage.from("post-images").upload(path, file);
+    setUploadingAttachment(false);
+    if (error) {
+      alert("Upload failed: " + error.message);
+    } else {
+      loadAttachments();
+    }
+  }
+
+  async function deleteAttachment(name: string) {
+    if (!brand) return;
+    const { error } = await supabase.storage
+      .from("post-images")
+      .remove([`brand-attachments/${brand.id}/${name}`]);
+    if (error) {
+      alert("Delete failed: " + error.message);
+    } else {
+      loadAttachments();
+    }
   }
 
   async function save() {
@@ -249,6 +303,48 @@ export default function BrandVoicePage() {
               value={form.faqs || ""}
               onChange={(e) => setForm({ ...form, faqs: e.target.value })}
             />
+          </div>
+
+          <div className="rounded-xl border border-b1 bg-c1 p-5">
+            <div className="mb-4 text-sm font-semibold text-t1">Attachments & Documents</div>
+            <div className="space-y-3">
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.md,.png,.jpg,.jpeg,.webp"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadAttachment(f);
+                  e.target.value = "";
+                }}
+                className="block w-full text-xs text-t2 file:mr-3 file:rounded-lg file:border-0 file:bg-acc file:px-3 file:py-2 file:text-sm file:text-white"
+                disabled={uploadingAttachment}
+              />
+              {uploadingAttachment && <div className="text-xs text-t2">Uploading...</div>}
+              {attachments.length === 0 ? (
+                <div className="text-xs text-t2">No attachments yet. Upload decks, docs, or guides.</div>
+              ) : (
+                <div className="space-y-2">
+                  {attachments.map((a) => (
+                    <div key={a.name} className="flex items-center justify-between rounded-lg border border-b1 bg-c2 p-2">
+                      <a
+                        href={a.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="max-w-[200px] truncate text-xs text-blu hover:underline"
+                      >
+                        {a.name}
+                      </a>
+                      <button
+                        onClick={() => deleteAttachment(a.name)}
+                        className="text-xs text-red hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <button
