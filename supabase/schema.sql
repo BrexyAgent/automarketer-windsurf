@@ -54,6 +54,7 @@ create table if not exists public.brands (
   name                text not null,
   industry            text,
   website             text,
+  social_links        jsonb default '{}'::jsonb,
   products            text,
   target_audience     text,
   platforms           text[] default '{}',
@@ -120,6 +121,7 @@ create table if not exists public.posts (
   reach               int default 0,
   engagement_rate     numeric default 0,
   platform_post_id    text,
+  post_url            text,
   publish_error       text,
   is_thread           boolean default false,
   thread_tweets       jsonb default '[]',
@@ -381,22 +383,48 @@ insert into storage.buckets (id, name, public)
 values ('post-images', 'post-images', true)
 on conflict (id) do nothing;
 
+drop policy if exists "Post images public read" on storage.objects;
+drop policy if exists "Post images authenticated upload" on storage.objects;
+drop policy if exists "Post images authenticated update" on storage.objects;
+drop policy if exists "Post images authenticated delete" on storage.objects;
+
 create policy "Post images public read"
   on storage.objects for select
   to anon, authenticated
   using ( bucket_id = 'post-images' );
 
-create policy "Post images authenticated upload"
+create policy "Post images scoped upload"
   on storage.objects for insert
   to authenticated
-  with check ( bucket_id = 'post-images' );
+  with check (
+    bucket_id = 'post-images'
+    and exists (
+      select 1 from public.organization_members
+      where user_id = auth.uid()
+      and organization_id::text = split_part(name, '/', 1)
+    )
+  );
 
-create policy "Post images authenticated update"
+create policy "Post images scoped update"
   on storage.objects for update
   to authenticated
-  using ( bucket_id = 'post-images' );
+  using (
+    bucket_id = 'post-images'
+    and exists (
+      select 1 from public.organization_members
+      where user_id = auth.uid()
+      and organization_id::text = split_part(name, '/', 1)
+    )
+  );
 
-create policy "Post images authenticated delete"
+create policy "Post images scoped delete"
   on storage.objects for delete
   to authenticated
-  using ( bucket_id = 'post-images' );
+  using (
+    bucket_id = 'post-images'
+    and exists (
+      select 1 from public.organization_members
+      where user_id = auth.uid()
+      and organization_id::text = split_part(name, '/', 1)
+    )
+  );

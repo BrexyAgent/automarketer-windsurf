@@ -111,7 +111,7 @@ export default function PostsPage() {
   async function uploadImage(file: File) {
     if (!view) return;
     setUploadingImage(true);
-    const path = `posts/${view.id}/${Date.now()}-${file.name}`;
+    const path = `${view.organization_id}/posts/${view.id}/${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("post-images").upload(path, file);
     if (error) {
       setUploadingImage(false);

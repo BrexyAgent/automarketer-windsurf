@@ -154,7 +154,7 @@ export default function ApprovalPage() {
   async function uploadImage(file: File) {
     if (!editing) return;
     setUploadingImage(true);
-    const path = `posts/${editing.id}/${Date.now()}-${file.name}`;
+    const path = `${editing.organization_id}/posts/${editing.id}/${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("post-images").upload(path, file);
     if (error) {
       setUploadingImage(false);

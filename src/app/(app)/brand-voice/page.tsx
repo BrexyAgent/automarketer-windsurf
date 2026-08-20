@@ -81,9 +81,8 @@ export default function BrandVoicePage() {
       setAttachments([]);
       return;
     }
-    const { data, error } = await supabase.storage
-      .from("post-images")
-      .list(`brand-attachments/${brand.id}`);
+    const prefix = `${brand.organization_id}/brand-attachments/${brand.id}`;
+    const { data, error } = await supabase.storage.from("post-images").list(prefix);
     if (error) {
       console.error(error);
       return;
@@ -94,7 +93,7 @@ export default function BrandVoicePage() {
         name: x.name,
         url: supabase.storage
           .from("post-images")
-          .getPublicUrl(`brand-attachments/${brand.id}/${x.name}`).data.publicUrl,
+          .getPublicUrl(`${prefix}/${x.name}`).data.publicUrl,
       }))
     );
   }
@@ -106,7 +105,7 @@ export default function BrandVoicePage() {
   async function uploadAttachment(file: File) {
     if (!brand) return;
     setUploadingAttachment(true);
-    const path = `brand-attachments/${brand.id}/${Date.now()}_${file.name}`;
+    const path = `${brand.organization_id}/brand-attachments/${brand.id}/${Date.now()}_${file.name}`;
     const { error } = await supabase.storage.from("post-images").upload(path, file);
     setUploadingAttachment(false);
     if (error) {
@@ -120,7 +119,7 @@ export default function BrandVoicePage() {
     if (!brand) return;
     const { error } = await supabase.storage
       .from("post-images")
-      .remove([`brand-attachments/${brand.id}/${name}`]);
+      .remove([`${brand.organization_id}/brand-attachments/${brand.id}/${name}`]);
     if (error) {
       alert("Delete failed: " + error.message);
     } else {
