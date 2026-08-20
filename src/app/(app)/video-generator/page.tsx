@@ -26,7 +26,7 @@ const VIDEO_PROVIDERS = [
   { id: "runway", name: "Runway ML" },
   { id: "pika", name: "Pika" },
   { id: "kling", name: "Kling" },
-  { id: "pollinations", name: "Pollinations (free image preview)" },
+  { id: "pollinations", name: "Pollinations (free video)" },
   { id: "custom", name: "Custom URL" },
 ];
 
@@ -49,7 +49,7 @@ export default function VideoGeneratorPage() {
   const [duration, setDuration] = useState("15");
   const [platform, setPlatform] = useState("instagram");
   const [aiProvider, setAiProvider] = useState("claude");
-  const [videoProvider, setVideoProvider] = useState("runway");
+  const [videoProvider, setVideoProvider] = useState("pollinations");
   const [script, setScript] = useState("");
   const [prompt, setPrompt] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
@@ -94,24 +94,31 @@ export default function VideoGeneratorPage() {
     buildPrompt();
 
     if (videoProvider === "custom") {
-      setVideoUrl("");
       setGenerating(false);
       setStep("done");
       return;
     }
 
-    // Simulated provider behavior — real calls need API keys
     if (videoProvider === "pollinations") {
+      const p = prompt || buildPromptString();
       const seed = Math.floor(Math.random() * 99999);
-      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt || buildPromptString())}?width=1280&height=720&model=flux&nologo=true&seed=${seed}`;
+      const dur = parseInt(duration, 10);
+      const model = dur <= 15 ? "wan" : "nova-reel";
+      const vertical = ["instagram", "tiktok", "youtube"].includes(platform);
+      const aspect = vertical ? "9:16" : "16:9";
+      const audio = model === "wan" ? "&audio=true" : "";
+      const url = `https://gen.pollinations.ai/video/${encodeURIComponent(p)}?model=${model}&duration=${dur}&aspectRatio=${aspect}&seed=${seed}${audio}`;
       setVideoUrl(url);
+      setGenerating(false);
+      setStep("done");
+      return;
     }
 
-    // Runway / Pika / Kling: only prompt is generated; actual video needs key
+    // Runway / Pika / Kling: actual video requires an API key in Integrations
     setTimeout(() => {
       setGenerating(false);
       setStep("done");
-    }, 800);
+    }, 600);
   }
 
   function buildPromptString() {
@@ -127,7 +134,7 @@ export default function VideoGeneratorPage() {
           <Clapperboard className="h-6 w-6 text-acc" />
           <h1 className="text-xl font-semibold text-t1">AI Video Generator</h1>
         </div>
-        <p className="mt-1 text-sm text-t2">Create scripts and prompts for product videos</p>
+        <p className="mt-1 text-sm text-t2">Generate AI product videos, scripts, and prompts</p>
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -239,7 +246,11 @@ export default function VideoGeneratorPage() {
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-acc px-4 py-3 text-sm font-medium text-white hover:bg-acc2 disabled:opacity-60"
           >
             <Wand2 className="h-4 w-4" />
-            {generating ? "Generating..." : "Generate Script & Video Prompt"}
+            {generating
+              ? "Generating..."
+              : videoProvider === "pollinations"
+              ? "Generate Script & Video"
+              : "Generate Script & Video Prompt"}
           </button>
         </div>
 
@@ -272,8 +283,13 @@ export default function VideoGeneratorPage() {
 
           {step === "done" && videoProvider === "pollinations" && videoUrl && (
             <div className="rounded-xl border border-b1 bg-c1 p-5">
-              <div className="mb-3 text-sm font-semibold text-t1">Preview Cover Frame</div>
-              <img src={videoUrl} alt="Preview" className="mb-3 w-full rounded-lg" />
+              <div className="mb-3 text-sm font-semibold text-t1">Generated Video</div>
+              <video
+                src={videoUrl}
+                controls
+                className="mb-3 w-full rounded-lg"
+                onLoadedData={() => setGenerating(false)}
+              />
               <a
                 href={videoUrl}
                 target="_blank"
@@ -284,7 +300,7 @@ export default function VideoGeneratorPage() {
                 Open / Download
               </a>
               <p className="mt-2 text-xs text-t2">
-                Pollinations currently gives a still image. For real motion video, connect Runway, Pika, or Kling in Integrations.
+                Pollinations is generating a real MP4 video for the prompt above. Playback may take a few seconds to load.
               </p>
             </div>
           )}
