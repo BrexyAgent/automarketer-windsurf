@@ -101,14 +101,13 @@ export default function VideoGeneratorPage() {
 
     if (videoProvider === "pollinations") {
       const p = prompt || buildPromptString();
-      const seed = Math.floor(Math.random() * 99999);
-      const dur = parseInt(duration, 10);
-      const model = dur <= 15 ? "wan" : "nova-reel";
       const vertical = ["instagram", "tiktok", "youtube"].includes(platform);
-      const aspect = vertical ? "9:16" : "16:9";
-      const audio = model === "wan" ? "&audio=true" : "";
-      const url = `https://gen.pollinations.ai/video/${encodeURIComponent(p)}?model=${model}&duration=${dur}&aspectRatio=${aspect}&seed=${seed}${audio}`;
-      setVideoUrl(url);
+      try {
+        const url = await renderVideoFromImages(p, vertical);
+        setVideoUrl(url);
+      } catch (e: any) {
+        alert("Video generation failed: " + (e.message || "unknown error"));
+      }
       setGenerating(false);
       setStep("done");
       return;
@@ -125,6 +124,101 @@ export default function VideoGeneratorPage() {
     if (!brand) return "";
     const t = topic.trim() || brand.content_pillars?.[0] || brand.name;
     return `Cinematic motion product video, ${brand.name}, ${brand.industry}, ${t}, clean modern lighting, subtle camera push-in, premium brand aesthetic, 16:9, no text overlays, photorealistic`;
+  }
+
+  async function renderVideoFromImages(promptText: string, vertical: boolean): Promise<string> {
+    const width = vertical ? 576 : 1024;
+    const height = vertical ? 1024 : 576;
+    const imageCount = 3;
+    const durationSec = Math.min(parseInt(duration, 10), 15);
+    const durationMs = durationSec * 1000;
+
+    const imageUrls = Array.from({ length: imageCount }, () => {
+      const seed = Math.floor(Math.random() * 99999);
+      return `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=${width}&height=${height}&model=flux&nologo=true&seed=${seed}`;
+    });
+
+    const images: HTMLImageElement[] = await Promise.all(
+      imageUrls.map(
+        (src) =>
+          new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error("Failed to load AI frame"));
+            img.src = src;
+          }) as Promise<HTMLImageElement>
+      )
+    );
+
+    if (typeof window === "undefined" || !window.MediaRecorder) {
+      throw new Error("Your browser does not support video recording.");
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.position = "fixed";
+    canvas.style.left = "-9999px";
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas not supported");
+
+    const mime = MediaRecorder.isTypeSupported("video/webm; codecs=vp9")
+      ? "video/webm; codecs=vp9"
+      : MediaRecorder.isTypeSupported("video/webm; codecs=vp8")
+      ? "video/webm; codecs=vp8"
+      : "video/webm";
+
+    const stream = (canvas as any).captureStream(30);
+    const recorder = new MediaRecorder(stream, { mimeType: mime });
+    const chunks: Blob[] = [];
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+
+    return new Promise<string>((resolve, reject) => {
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mime });
+        (stream as any).getTracks().forEach((track: any) => track.stop());
+        document.body.removeChild(canvas);
+        resolve(URL.createObjectURL(blob));
+      };
+      recorder.onerror = () => {
+        (stream as any).getTracks().forEach((track: any) => track.stop());
+        document.body.removeChild(canvas);
+        reject(new Error("Recording failed"));
+      };
+
+      recorder.start();
+      const start = performance.now();
+
+      const draw = (now: number) => {
+        const elapsed = now - start;
+        if (elapsed >= durationMs) {
+          recorder.stop();
+          return;
+        }
+        const t = elapsed / durationMs;
+        const idx = Math.min(images.length - 2, Math.floor(t * (images.length - 1)));
+        const local = t * (images.length - 1) - idx;
+        const img1 = images[idx];
+        const img2 = images[idx + 1];
+        const scale = 1 + 0.05 * Math.sin(t * Math.PI * 2);
+        const dx = (width - width * scale) / 2;
+        const dy = (height - height * scale) / 2;
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(img1, dx, dy, width * scale, height * scale);
+        ctx.globalAlpha = local;
+        ctx.drawImage(img2, dx, dy, width * scale, height * scale);
+        ctx.globalAlpha = 1;
+
+        requestAnimationFrame(draw);
+      };
+
+      requestAnimationFrame(draw);
+    });
   }
 
   return (
@@ -289,6 +383,10 @@ export default function VideoGeneratorPage() {
                 controls
                 className="mb-3 w-full rounded-lg"
                 onLoadedData={() => setGenerating(false)}
+                onError={() => {
+                  alert("Video failed to load. Try a shorter duration or switch to the Custom URL provider.");
+                  setGenerating(false);
+                }}
               />
               <a
                 href={videoUrl}
@@ -300,7 +398,7 @@ export default function VideoGeneratorPage() {
                 Open / Download
               </a>
               <p className="mt-2 text-xs text-t2">
-                Pollinations is generating a real MP4 video for the prompt above. Playback may take a few seconds to load.
+                Pollinations is creating a real AI-animated video from generated frames. This takes ~20-30 seconds and is capped at 15s for the free tier.
               </p>
             </div>
           )}
